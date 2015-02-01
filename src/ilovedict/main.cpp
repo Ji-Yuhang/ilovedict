@@ -7,6 +7,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
 struct Object {
     std::string word;
     bool operator <(const Object &b) const
