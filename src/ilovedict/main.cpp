@@ -1,4 +1,4 @@
-//#include <QCoreApplication>
+#include <QCoreApplication>
 #include <map>
 #include <list>
 #include <vector>
@@ -7,6 +7,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include "review.hxx"
+/*
 struct Object {
     std::string word;
     bool operator <(const Object &b) const
@@ -174,10 +176,13 @@ void parseResult()
 
    exit(0);
 }
-
+*/
 int main(int argc, char *argv[])
 {
-    //    QCoreApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
+    Review review;
+    review.test();
+/*
     char alpha[26] = {'a','b','c','d','e','f','g',
         'h','i','j','k','l','m','n',
         'o','p','q','r','s','t',
@@ -241,7 +246,7 @@ int main(int argc, char *argv[])
     }
 
 
-
-    //    return a.exec();
+*/
+        return a.exec();
     return 0;
 }
