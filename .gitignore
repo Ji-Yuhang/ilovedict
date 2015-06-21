@@ -30,3 +30,11 @@ Makefile*
 #QtCtreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
+
+#cscope
+*.out
+*.in.out
+*.po.out
+
+# build
+src/build-ilovedict-Desktop-Debug
