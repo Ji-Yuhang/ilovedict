@@ -1,29 +1,35 @@
 #require_relative 'collins_to_memo'
 require 'open-uri'
 require 'json'
+require 'awesome_print'
+require 'nokogiri'
 module ShanbayHttp
-    def http_data(word)
-        getwordui = "https://api.shanbay.com/bdc/search/?word=#{word}"
-        open( getwordui) do |io|
-            jsonstr =  io.read
-            json = JSON.parse(jsonstr)
-            data = json["data"]
-            return data
-        end
-        return nil
+  $ShanbayCache = {}
+  def http_data(word)
+    return $ShanbayCache[word] if $ShanbayCache.include? word
+
+    getwordui = "https://api.shanbay.com/bdc/search/?word=#{word}"
+    open( getwordui) do |io|
+      jsonstr =  io.read
+      json = JSON.parse(jsonstr)
+      data = json["data"]
+      $ShanbayCache[word] = data
+      return data
     end
-    def local_http_data(word)
-        getwordui = "http://localhost/shanbayword/?word=#{word}"
-        open( getwordui) do |io|
-            jsonstr =  io.read
-            #Iconv.conv('gbk','utf-8',result)
-            json = JSON.parse(jsonstr)
-            #data = json["data"]
-            return json
-        end
-        return nil
+    return nil
+  end
+  def local_http_data(word)
+    getwordui = "http://localhost/shanbayword/?word=#{word}"
+    open( getwordui) do |io|
+      jsonstr =  io.read
+      #Iconv.conv('gbk','utf-8',result)
+      json = JSON.parse(jsonstr)
+      #data = json["data"]
+      return json
     end
-    module_function :http_data, :local_http_data
+    return nil
+  end
+  module_function :http_data, :local_http_data
 end
 
 def parse_shanbay_data(data)
@@ -65,6 +71,36 @@ def strategy
   [0,1,2,3,5,7,9,11,15,30,45,60,90,120,240,480]
 end
 
+def videos(word)
+  url = "http://dict.youdao.com/example/mdia/video/#{word}/#keyfrom=dict.main.sentence.mdia.video"
+  doc = Nokogiri::HTML(open(url))
+  videos = doc.css("a[class='play log-js']")
+  videos.each do |video|
+    href =  video['href']
+    movieurls = href.scan /http.*docid=[-\d]*/
+    #ap href
+    movieurl =  movieurls.first
+    ap movieurl
+    exec("mplayer " + movieurl + " >/dev/null 2>&1") if fork.nil?
+    gets
+  end
+end
+
+def audios(word)
+  url = "http://dict.youdao.com/example/mdia/audio/#{word}/#keyfrom=dict.main.sentence.mdia.video"
+  doc = Nokogiri::HTML(open(url))
+  videos = doc.css("a[class='sp humanvoice humanvoice-js log-js']")
+  videos.each do |video|
+    href =  video['data-rel']
+    movieurls = href.scan /http.*docid=[-\d]*/
+    #ap href
+    movieurl =  movieurls.first
+    ap movieurl
+    exec("mplayer " + movieurl + " >/dev/null 2>&1") if fork.nil?
+    gets
+
+  end
+end
 class Queue
   attr_accessor :list, :strategy
 
@@ -106,6 +142,10 @@ class Queue
     posit = @strategyMap[current] + strategy[v]
     @strategyMap[current] += strategy[v]
     list.insert @index + posit, current
+    data = ShanbayHttp::http_data current 
+    p data["pron"]
+    audios current
+    #p current
   end
 
   private
@@ -113,8 +153,7 @@ class Queue
 
 end
 
-def queue
-end
+
 
 def main
   queue = Queue.new
@@ -127,7 +166,9 @@ def main
     queue.show
     score = gets
     si =  score.to_i
-    si = 1 if si == 0
+    ap si
+    ap si.class
+    si = 2 if si == 0
     queue.score si
   end
    
