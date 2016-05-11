@@ -58,13 +58,13 @@ end
 
 def source
   wordlist = []
-  File.open '1.txt' do |io|
+  File.open '5.txt' do |io|
     io.each do |line|
       word = line.strip
       wordlist << word
     end
   end
-  wordlist = wordlist[1..10]
+  wordlist = wordlist.shuffle[1..10]
 end
 
 def strategy
@@ -85,7 +85,10 @@ def videos(word)
     gets
   end
 end
-
+def split_sentence(sentence)
+  sentence.split.map{|c| d = c.downcase; d = d.strip; d = d.gsub /[^\w]/, ''}.select{|w| !w.empty?}
+end
+$existWords=[]
 def audios(word)
   url = "http://dict.youdao.com/example/mdia/audio/#{word}/#keyfrom=dict.main.sentence.mdia.video"
   doc = Nokogiri::HTML(open(url))
@@ -95,10 +98,31 @@ def audios(word)
     movieurls = href.scan /http.*docid=[-\d]*/
     #ap href
     movieurl =  movieurls.first
+    text= video.parent.text.strip
+    words = split_sentence text
+    words.each do |w|
+      data = ShanbayHttp::http_data w 
+      next if data.nil?
+      next if data.empty?
+      next if $existWords.include? w
+      $existWords << w
+      next if data["us_audio"].nil?
+      exec("mplayer " + data["us_audio"] + " >/dev/null 2>&1") if fork.nil?
+      gets
+      ap data["content"]+"    " + data["pron"]
+      #ap data["en_definitions"]
+      ap data["definition"]
+      gets
+
+    end
+    ap words
     ap movieurl
     exec("mplayer " + movieurl + " >/dev/null 2>&1") if fork.nil?
     gets
-
+    ap text
+    gets
+    exec("mplayer " + movieurl + " >/dev/null 2>&1") if fork.nil?
+    gets
   end
 end
 class Queue
