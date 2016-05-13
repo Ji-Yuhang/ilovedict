@@ -1,4 +1,6 @@
 #require_relative 'collins_to_memo'
+ENV['SSL_CERT_FILE'] ="C:\\OpenSSL-Win64\\bin\\PEM\\cacert.pem"
+
 require 'open-uri'
 require 'json'
 require 'awesome_print'
