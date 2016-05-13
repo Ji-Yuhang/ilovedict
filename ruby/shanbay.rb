@@ -5,7 +5,7 @@ require "awesome_print"
 require "pp"
 
 module Shanbay
-    def shanbayword(word)
+    def format_word(word)
         word = word.strip
         word = word.chomp
         word = word.gsub(/[^A-Za-z\ \-]/,'')
@@ -13,18 +13,21 @@ module Shanbay
             multiWord = word.split()
             word = multiWord.join('%20')
         end
-        
+    end
+    def shanbayword(word)
+        word = format_word word
+              
         getworduri = "https://api.shanbay.com/bdc/search/?word=#{word}"
         open( getworduri) do |io|
             jsonstr =  io.read
             my_hash = JSON.parse(jsonstr)
             data = my_hash["data"]
-            cndef = data["cn_definition"]
-            endef = data["en_definition"]
-            word = data["content"]
+#            cndef = data["cn_definition"]
+#            endef = data["en_definition"]
+#            word = data["content"]
             #puts word
 
-            audio = data["us_audio"]
+#            audio = data["us_audio"]
 
             #puts cndef["defn"]
             #puts endef["defn"]
@@ -38,5 +41,5 @@ module Shanbay
     end
 
 
-    module_function :shanbayword
+    module_function :shanbayword, :format_word
 end

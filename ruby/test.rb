@@ -9,7 +9,7 @@ File.open("unknown.txt") do |io|
     io.each_line do |line|
         word = line.chomp
         wordList.push word
-        break if wordList.size > 30
+        break if wordList.size > 10
     end
 end
 

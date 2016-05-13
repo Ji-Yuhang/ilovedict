@@ -135,6 +135,8 @@ module View
     class ShowCard
         def initialize
             @app = Qt::Application.new(ARGV)
+            @widget = Qt::Label.new
+            @widget.resize 400, 300
         end
         def setReviewStrategy(strategy)
             @strategy = strategy
@@ -143,8 +145,6 @@ module View
             setReviewStrategy strategy
             nextindex = nil
             loop {
-                #widget = Qt::Widget.new
-                #widget.show
                 record = @strategy.nextRecord nextindex
                 if record.nil?
                     ap "have finished today's review"
@@ -153,10 +153,14 @@ module View
                 card = record.card
                 ap card.front
                 ap "0:Forget, 1:Hard, 2:Mid, 3:Easy, 4:Too Easy, 5:Never See"
+                @widget.text = card.front
+                @widget.show
+                @app.processEvents
                 feedback = gets
                 save record, feedback
                 nextindex = record
 
+                @app.processEvents
             }
             #@app.exec
         end
