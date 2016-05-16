@@ -1,6 +1,7 @@
 #require_relative 'collins_to_memo'
-ENV['SSL_CERT_FILE'] ="C:\\OpenSSL-Win64\\bin\\PEM\\cacert.pem"
-
+if ENV['_system_name'] != "OSX"
+  ENV['SSL_CERT_FILE'] ="C:\\OpenSSL-Win64\\bin\\PEM\\cacert.pem"
+end
 require 'open-uri'
 require 'json'
 require 'awesome_print'
