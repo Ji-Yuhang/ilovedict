@@ -33,34 +33,36 @@ def audios(word)
 
   word.gsub! ' ', '%20'
   url = "http://dict.youdao.com/example/mdia/audio/#{word}"
-  doc = Nokogiri::HTML(open(url))
-  videos = doc.css("a[class='sp humanvoice humanvoice-js log-js']")
-  videos.each do |video|
-    href =  video['data-rel']
-    movieurls = href.scan /http.*docid=[-\d]*/
-    movieurl =  movieurls.first
-    text= video.parent.text.strip
+  begin
+    doc = Nokogiri::HTML(open(url))
+    videos = doc.css("a[class='sp humanvoice humanvoice-js log-js']")
+    videos.each do |video|
+      href =  video['data-rel']
+      movieurls = href.scan /http.*docid=[-\d]*/
+      movieurl =  movieurls.first
+      text= video.parent.text.strip
 
-    filename = movieurl.scan(/[-\d]+/).first
-    filename.gsub! /-/, '0'
-    filename += ".mp3"
+      filename = movieurl.scan(/[-\d]+/).first
+      filename.gsub! /-/, '0'
+      filename += ".mp3"
 
-    ap text
-    data = Audio.new
-    data.word=word
-    data.url=movieurl
-    #next if Audio.where(word: word).size > 0
-    data.filename=filename
-    data.sentence=text
-    #data.sentence_html=text
-    temp = open(movieurl)
-    mp3data = temp.read
-    #exec("mplayer " + temp.path + " >/dev/null 2>&1") 
-    data.audio_data = mp3data
-    #ap data
-    #ap movieurl
-    #temp.unlink
-    data.save!
+      data = Audio.new
+      data.word=word
+      data.url=movieurl
+      #next if Audio.where(word: word).size > 0
+      data.filename=filename
+      data.sentence=text
+      #data.sentence_html=text
+      temp = open(movieurl)
+      mp3data = temp.read
+      #exec("mplayer " + temp.path + " >/dev/null 2>&1") 
+      data.audio_data = mp3data
+      #ap data
+      #ap movieurl
+      #temp.unlink
+      data.save!
+    end
+  rescue
   end
 end
 
