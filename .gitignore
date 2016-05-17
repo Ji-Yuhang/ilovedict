@@ -38,3 +38,4 @@ Makefile*
 
 # build
 src/build-ilovedict-Desktop-Debug
+.idea
