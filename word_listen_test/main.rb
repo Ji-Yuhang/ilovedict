@@ -6,12 +6,13 @@ require 'open-uri'
 require 'json'
 require 'awesome_print'
 require 'nokogiri'
+require 'uri'
 module ShanbayHttp
   $ShanbayCache = {}
   def http_data(word)
     return $ShanbayCache[word] if $ShanbayCache.include? word
 
-    getwordui = "https://api.shanbay.com/bdc/search/?word=#{word}"
+    getwordui = URI.escape("https://api.shanbay.com/bdc/search/?word=#{word}")
     open( getwordui) do |io|
       jsonstr =  io.read
       json = JSON.parse(jsonstr)
@@ -61,7 +62,10 @@ end
 
 def source
   wordlist = []
-  File.open '5.txt' do |io|
+  wordlist = File.read('collins_1_list_1.txt').split("\n").map(&:strip)[0..30]
+  #ap wordlist
+  return wordlist
+  File.open 'collins_1_list_1.txt' do |io|
     io.each do |line|
       word = line.strip
       wordlist << word
@@ -158,20 +162,26 @@ class Queue
     value = list[@index]
     data = ShanbayHttp::http_data value 
     audio = data["us_audio"]
-    exec("mplayer " + audio + " >/dev/null 2>&1") if fork.nil?
+    exec("mplayer " + audio + " >/dev/null 2>&1") if fork.nil? if audio
 
     #puts "#{@map[value]}   #{value}"
     #parse_shanbay_data data
   end
 
+
+  def show_answer
+    current = list[@index]
+    data = ShanbayHttp::http_data current 
+    ap data["pron"] + "        " + data["content"]
+    #ap data["cn_definition"]["defn"]
+  end
+
   def score(v)
     current = list[@index]
     posit = @strategyMap[current] + strategy[v]
-    @strategyMap[current] += strategy[v]
     list.insert @index + posit, current
-    data = ShanbayHttp::http_data current 
-    p data["pron"]
-    audios current
+    @strategyMap[current] += strategy[v]
+    #audios current
     #p current
   end
 
@@ -191,10 +201,15 @@ def main
   
   while queue.next
     queue.show
+
+    ap "查看答案 Enter "
+    gets
+    queue.show_answer
+    ap " 输入分数 [1..5] Enter"
     score = gets
     si =  score.to_i
     ap si
-    ap si.class
+    #ap si.class
     si = 2 if si == 0
     queue.score si
   end

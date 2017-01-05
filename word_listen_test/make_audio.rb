@@ -6,6 +6,7 @@ require 'active_record'
 require 'sqlite3'
 require 'byebug'
 require 'tempfile'
+require 'uri'
 ActiveRecord::Base.establish_connection :adapter => "sqlite3",
 :database => "./audio.sqlite3"
  
@@ -31,8 +32,8 @@ end
 
 def audios(word)
 
-  word.gsub! ' ', '%20'
-  url = "http://dict.youdao.com/example/mdia/audio/#{word}"
+  #word.gsub! ' ', '%20'
+  url = URI.escape("http://dict.youdao.com/example/mdia/audio/#{word}")
   begin
     doc = Nokogiri::HTML(open(url))
     videos = doc.css("a[class='sp humanvoice humanvoice-js log-js']")
